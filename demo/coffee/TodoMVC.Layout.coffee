@@ -53,10 +53,12 @@ TodoMVC.module 'Layout', (Layout, App, Backbone) ->
 		serializeData: ->
 			active = @collection.getActive().length
 			total = @collection.length
+			@completedCount(active, total)
 
-				activeCount: active
-				totalCount: total
-				completedCount: total - active
+		completedCount: (active, total)->
+			activeCount: active
+			totalCount: total
+			completedCount: total - active
 
 		onRender: ->
 			@$el.parent().toggle @collection.length > 0

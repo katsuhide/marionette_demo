@@ -8,10 +8,11 @@ TodoMVC.module 'TodoList', (TodoList, App, Backbone, Marionette, $, _) ->
         "*filter": "filterItems"
 
   # TodoList Controller
-  class TodoList.Controller
-    constructor: () ->
-      @todoList = new App.Todos.TodoList()
+  TodoList.Controller = ->
+    @todoList = new App.Todos.TodoList()
+    @
 
+  _.extend TodoList.Controller.prototype,
     start: ->
       @showHeader @todoList
       @showFooter @todoList
@@ -42,5 +43,4 @@ TodoMVC.module 'TodoList', (TodoList, App, Backbone, Marionette, $, _) ->
     controller = new TodoList.Controller()
     controller.router = new TodoList.Router
       controller: controller
-
     controller.start()

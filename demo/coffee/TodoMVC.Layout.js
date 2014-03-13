@@ -81,12 +81,14 @@ TodoMVC.module('Layout', function(Layout, App, Backbone) {
     Footer.prototype.serializeData = function() {
       var active, total;
       active = this.collection.getActive().length;
-      return total = this.collection.length({
+      total = this.collection.length;
+      return {
         activeCount: active,
         totalCount: total,
         completedCount: total - active
-      });
+      };
     };
+
 
     Footer.prototype.onRender = function() {
       this.$el.parent().toggle(this.collection.length > 0);

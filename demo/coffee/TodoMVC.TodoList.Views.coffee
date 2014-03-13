@@ -5,10 +5,11 @@ TodoMVC.module 'TodoList.Views', (Views, App, Backbone, Marionette, $) ->
 	class Views.ItemView extends Marionette.ItemView
 		tagName: 'li'
 		template: '#template-todoItemView'
+
 		ui:
 			edit: '.edit'
 
-		events:
+		eventns:
 			'click .destroy': 'destroy'
 			'dblclick label': 'onEditClick'
 			'keydown .edit': 'onEditKeypress'
@@ -21,9 +22,16 @@ TodoMVC.module 'TodoList.Views', (Views, App, Backbone, Marionette, $) ->
 		onRender: ->
 			@$el.removeClass 'active completed'
 
-			if @model.get 'completed' then @$el.addClass 'completed' else @$el.addClass 'active'
+			if @model.get 'completed'
+				@$el.addClass 'completed'
+			else
+				@$el.addClass 'active'
 
 		destroy: ->
+			console.log "destroy"
+			@model.destroy()
+
+		toggle: ->
 			@model.toggle().save()
 
 		onEditClick: ->
@@ -34,10 +42,11 @@ TodoMVC.module 'TodoList.Views', (Views, App, Backbone, Marionette, $) ->
 		onEditFocusout: ->
 			todoText = @ui.edit.val().trim()
 			if todoText
-				@model.set 'title', todoText save()
+				@model.set 'title', todoText
+				.save()
 				@$el.removeClass 'editing'
 			else
-				@destroy
+				@destroy()
 
 		onEditKeypress: (e) ->
 			ENTER_KEY = 13
@@ -50,41 +59,41 @@ TodoMVC.module 'TodoList.Views', (Views, App, Backbone, Marionette, $) ->
 				@ui.edit.val @model.get 'title'
 				@$el.removeClass 'editing'
 
+	# Item List View
+	class Views.ListView extends Backbone.Marionette.CompositeView
+			template: '#template-todoListCompositeView'
+			itemView: Views.ItemView
+			itemViewContainer: '#todo-list'
 
-    class Views.ListView extends Backbone.Marionette.CompositeView
-		template: '#template-todoListCompositeView'
-		itemView: Views.ItemView
-		itemViewContainer: '#todo-list'
-		ui:
-			toggle: '#toggle-all'
+			ui:
+				toggle: '#toggle-all'
 
-		events:
-			'click #toggle-all': 'onToggleAllClick'
+			events:
+				'click #toggle-all': 'onToggleAllClick'
 
-		collectionEvents:
-			'all': 'update'
+			collectionEvents:
+				'all': 'update'
 
-		onRender: ->
-			@update()
+			onRender: ->
+				@update()
 
-		update: ->
-			reduceCompleted (left, right)->
-				left and right.get 'completed'
+			update: ->
+				reduceCompleted = (left, right) ->
+					left and right.get 'completed'
 
-			allCompleted = @collection.reduce reduceCompleted, true
+				allCompleted = @collection.reduce reduceCompleted, true
 
-			@ui.toggle.prop 'checked' allCompleted
-			@$el.parent().toggle !!@collection.length
+				@ui.toggle.prop 'checked', 'allCompleted'
+				@$el.parent().toggle !!this.collection.length
 
-		onToggleAllClick: (e) ->
-			isChecked = e.currentTarget.checked
-			@collection.each (todo) ->
-				todo.save
-					'completed': isChecked
+			onToggleAllClick: (e) ->
+				isChecked = e.currentTarget.checked
+				@collection.each (todo) ->
+					todo.save
+						'completed': isChecked
 
 
-
+	# Application Evenet Handlers
 	App.vent.on 'todoList:filter', (filter) ->
 		filter = filter or 'all'
-		$('#todoapp').attr 'class' , 'filter-' + filter
-
+		$('#todoapp').attr 'class', 'filter-' + filter

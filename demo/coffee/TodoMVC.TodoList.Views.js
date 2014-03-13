@@ -4,7 +4,7 @@ var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 TodoMVC.module('TodoList.Views', function(Views, App, Backbone, Marionette, $) {
-  return Views.ItemView = (function(_super) {
+  Views.ItemView = (function(_super) {
     __extends(ItemView, _super);
 
     function ItemView() {
@@ -19,7 +19,7 @@ TodoMVC.module('TodoList.Views', function(Views, App, Backbone, Marionette, $) {
       edit: '.edit'
     };
 
-    ItemView.prototype.events = {
+    ItemView.prototype.eventns = {
       'click .destroy': 'destroy',
       'dblclick label': 'onEditClick',
       'keydown .edit': 'onEditKeypress',
@@ -41,6 +41,10 @@ TodoMVC.module('TodoList.Views', function(Views, App, Backbone, Marionette, $) {
     };
 
     ItemView.prototype.destroy = function() {
+      return this.model.destroy();
+    };
+
+    ItemView.prototype.toggle = function() {
       return this.model.toggle().save();
     };
 
@@ -54,10 +58,10 @@ TodoMVC.module('TodoList.Views', function(Views, App, Backbone, Marionette, $) {
       var todoText;
       todoText = this.ui.edit.val().trim();
       if (todoText) {
-        this.model.set('title', todoText(save()));
+        this.model.set('title', todoText).save();
         return this.$el.removeClass('editing');
       } else {
-        return this.destroy;
+        return this.destroy();
       }
     };
 
@@ -77,4 +81,60 @@ TodoMVC.module('TodoList.Views', function(Views, App, Backbone, Marionette, $) {
     return ItemView;
 
   })(Marionette.ItemView);
+  Views.ListView = (function(_super) {
+    __extends(ListView, _super);
+
+    function ListView() {
+      return ListView.__super__.constructor.apply(this, arguments);
+    }
+
+    ListView.prototype.template = '#template-todoListCompositeView';
+
+    ListView.prototype.itemView = Views.ItemView;
+
+    ListView.prototype.itemViewContainer = '#todo-list';
+
+    ListView.prototype.ui = {
+      toggle: '#toggle-all'
+    };
+
+    ListView.prototype.events = {
+      'click #toggle-all': 'onToggleAllClick'
+    };
+
+    ListView.prototype.collectionEvents = {
+      'all': 'update'
+    };
+
+    ListView.prototype.onRender = function() {
+      return this.update();
+    };
+
+    ListView.prototype.update = function() {
+      var allCompleted, reduceCompleted;
+      reduceCompleted = function(left, right) {
+        return left && right.get('completed');
+      };
+      allCompleted = this.collection.reduce(reduceCompleted, true);
+      this.ui.toggle.prop('checked', 'allCompleted');
+      return this.$el.parent().toggle(!!this.collection.length);
+    };
+
+    ListView.prototype.onToggleAllClick = function(e) {
+      var isChecked;
+      isChecked = e.currentTarget.checked;
+      return this.collection.each(function(todo) {
+        return todo.save({
+          'completed': isChecked
+        });
+      });
+    };
+
+    return ListView;
+
+  })(Backbone.Marionette.CompositeView);
+  return App.vent.on('todoList:filter', function(filter) {
+    filter = filter || 'all';
+    return $('#todoapp').attr('class', 'filter-' + filter);
+  });
 });
