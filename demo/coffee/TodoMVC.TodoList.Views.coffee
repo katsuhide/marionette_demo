@@ -9,7 +9,7 @@ TodoMVC.module 'TodoList.Views', (Views, App, Backbone, Marionette, $) ->
 		ui:
 			edit: '.edit'
 
-		eventns:
+		events:
 			'click .destroy': 'destroy'
 			'dblclick label': 'onEditClick'
 			'keydown .edit': 'onEditKeypress'

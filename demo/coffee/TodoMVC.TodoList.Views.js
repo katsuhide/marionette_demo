@@ -19,7 +19,7 @@ TodoMVC.module('TodoList.Views', function(Views, App, Backbone, Marionette, $) {
       edit: '.edit'
     };
 
-    ItemView.prototype.eventns = {
+    ItemView.prototype.events = {
       'click .destroy': 'destroy',
       'dblclick label': 'onEditClick',
       'keydown .edit': 'onEditKeypress',
@@ -41,6 +41,7 @@ TodoMVC.module('TodoList.Views', function(Views, App, Backbone, Marionette, $) {
     };
 
     ItemView.prototype.destroy = function() {
+      console.log("destroy");
       return this.model.destroy();
     };
 
